@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>実態財務アナライザー Pro | 銀行自己査定・実態B/S引き直しシステム</title>
+<style>
+  :root {
+    --navy-950: #060b19;
+    --navy-900: #0f172a;
+    --navy-800: #1e293b;
+    --navy-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50:  #f8fafc;
+    --blue-600:  #2563eb;
+    --blue-500:  #3b82f6;
+    --blue-50:   #eff6ff;
+    --emerald-600: #059669;
+    --emerald-50:  #ecfdf5;
+    --amber-600:   #d97706;
+    --amber-50:    #fffbeb;
+    --red-600:     #dc2626;
+    --red-50:      #fef2f2;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    background-color: #f1f5f9;
+    color: var(--navy-900);
+    margin: 0;
+    padding: 0;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* トップヘッダーバー（Bloomberg / モダンFintech風） */
+  .topbar {
+    background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-900) 100%);
+    color: #fff;
+    padding: 18px 32px;
+    border-bottom: 3px solid var(--blue-600);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  .brand-wrap { display: flex; align-items: center; gap: 14px; }
+  .brand-badge {
+    background: var(--blue-600);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+  }
+  .brand-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .brand-sub { font-size: 0.78rem; color: var(--slate-400); margin: 2px 0 0 0; }
+
+  .top-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-top {
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    transition: all 0.15s;
+  }
+  .btn-top:hover { background: rgba(255,255,255,0.18); }
+  .btn-top-primary {
+    background: var(--emerald-600);
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+  }
+  .btn-top-primary:hover { background: #047857; }
+
+  /* メインレイアウト */
+  .main-container {
+    max-width: 1520px;
+    margin: 24px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 470px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 1200px) {
+    .main-container { grid-template-columns: 1fr; }
+  }
+
+  /* カード共通 */
+  .panel {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--slate-50);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--navy-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-body { padding: 16px 18px; }
+
+  /* 入力コントロール */
+  .control-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .field-box label {
+    display: block;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--slate-600);
+    margin-bottom: 4px;
+  }
+  .field-box input, .field-box select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy-900);
+    background: #fff;
+  }
+  .bench-override {
+    background: var(--blue-50);
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+  }
+  .bench-override-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .bench-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .bench-grid div label {
+    font-size: 0.68rem;
+    color: var(--slate-600);
+    display: block;
+    font-weight: 700;
+  }
+  .bench-grid div input {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    text-align: right;
+    border: 1px solid #93c5fd;
+    border-radius: 4px;
+    font-weight: 700;
+    background: #fff;
+  }
+
+  /* 3期入力テーブル */
+  table.fin-input-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  table.fin-input-table th {
+    background: var(--navy-900);
+    color: #fff;
+    padding: 7px 6px;
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.73rem;
+  }
+  table.fin-input-table th:first-child { text-align: left; padding-left: 8px; }
+  table.fin-input-table td {
+    padding: 4px 4px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--navy-800);
+    font-weight: 600;
+  }
+  table.fin-input-table td:first-child { padding-left: 8px; }
+  table.fin-input-table tr.cat-row td {
+    background: var(--slate-100);
+    color: var(--navy-900);
+    font-weight: 800;
+    font-size: 0.73rem;
+    padding: 5px 8px;
+    border-top: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--slate-200);
+  }
+  table.fin-input-table tr.auto-row {
+    background: #f8fafc;
+    font-weight: 800;
+  }
+  table.fin-input-table tr.auto-row td {
+    padding: 6px 8px;
+    text-align: right;
+    color: var(--blue-600);
+  }
+  table.fin-input-table tr.auto-row td:first-child { text-align: left; }
+  table.fin-input-table input {
+    width: 72px;
+    padding: 4px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy-900);
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  table.fin-input-table input:focus {
+    outline: none;
+    border-color: var(--blue-600);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    background: #eff6ff;
+  }
+  .rule-tag {
+    font-size: 0.63rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--slate-200);
+    color: var(--slate-600);
+    margin-left: 4px;
+  }
+
+  /* 右側：格付けヘッダーバナー */
+  .rating-hero {
+    background: var(--navy-900);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: center;
+    border-left: 6px solid var(--blue-500);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+  .rating-meta { font-size: 0.75rem; color: var(--slate-400); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .rating-main-title { font-size: 1.4rem; font-weight: 900; margin: 4px 0 6px 0; }
+  .rating-desc { font-size: 0.84rem; color: var(--slate-200); line-height: 1.5; }
+  .rating-score-box {
+    text-align: center;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 12px 22px;
+    border-radius: 8px;
+    min-width: 120px;
+  }
+  .rating-score-label { font-size: 0.68rem; color: var(--slate-400); font-weight: 700; }
+  .rating-score-val { font-size: 2rem; font-weight: 900; line-height: 1.1; margin-top: 4px; }
+
+  /* 6大KPIカード */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 4px;
+    background: var(--slate-400);
+  }
+  .kpi-card.status-good::before { background: var(--emerald-600); }
+  .kpi-card.status-warn::before { background: var(--amber-600); }
+  .kpi-card.status-danger::before { background: var(--red-600); }
+
+  .kpi-label { font-size: 0.74rem; font-weight: 800; color: var(--slate-500); }
+  .kpi-main { font-size: 1.35rem; font-weight: 900; color: var(--navy-900); margin: 5px 0 4px 0; }
+  .kpi-sub { font-size: 0.73rem; color: var(--slate-600); display: flex; justify-content: space-between; align-items: center; }
+  .pill {
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 99px;
+  }
+  .pill-good { background: var(--emerald-50); color: var(--emerald-600); }
+  .pill-warn { background: var(--amber-50); color: var(--amber-600); }
+  .pill-danger { background: var(--red-50); color: var(--red-600); }
+
+  /* T字型 実態貸借対照表（左右対照B/S） */
+  .t-bs-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 2px solid var(--navy-900);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 850px) { .t-bs-wrapper { grid-template-columns: 1fr; } }
+  .t-bs-left { border-right: 2px solid var(--navy-900); }
+  .t-bs-col-header {
+    background: var(--navy-900);
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+  }
+  table.t-bs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  table.t-bs-table th {
+    background: var(--slate-100);
+    color: var(--slate-600);
+    padding: 6px 8px;
+    font-size: 0.7rem;
+    text-align: right;
+    border-bottom: 1px solid var(--slate-200);
+  }
+  table.t-bs-table th:first-child { text-align: left; }
+  table.t-bs-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--slate-100);
+    text-align: right;
+    font-weight: 600;
+  }
+  table.t-bs-table td:first-child { text-align: left; color: var(--navy-800); }
+  table.t-bs-table tr.sec-row td {
+    background: #f8fafc;
+    font-weight: 800;
+    font-size: 0.72rem;
+    color: var(--slate-600);
+    padding: 4px 8px;
+  }
+  table.t-bs-table tr.total-row td {
+    background: var(--blue-50);
+    font-weight: 900;
+    border-top: 2px solid var(--navy-800);
+    font-size: 0.82rem;
+  }
+  table.t-bs-table tr.net-asset-row td {
+    background: #fef2f2;
+    font-weight: 900;
+    border-top: 2px solid var(--red-600);
+  }
+  table.t-bs-table tr.net-asset-row.is-positive td {
+    background: var(--emerald-50);
+    border-top: 2px solid var(--emerald-600);
+  }
+  .val-cut { color: var(--red-600); font-weight: 800; }
+  .val-add { color: var(--amber-600); font-weight: 800; }
+  .val-real { color: var(--navy-950); font-weight: 900; }
+  .audit-reason { display: block; font-size: 0.66rem; color: var(--red-600); font-weight: 700; }
+
+  /* 3期トレンド＆P/L修正テーブル */
+  table.std-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+  table.std-table th {
+    background: var(--slate-100);
+    color: var(--navy-800);
+    padding: 8px 10px;
+    text-align: right;
+    font-weight: 800;
+    font-size: 0.74rem;
+    border-bottom: 2px solid var(--slate-200);
+  }
+  table.std-table th:first-child { text-align: left; }
+  table.std-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--slate-100);
+    text-align: right;
+    font-weight: 600;
+  }
+  table.std-table td:first-child { text-align: left; font-weight: 700; }
+  table.std-table tr.highlight-row td {
+    background: #eff6ff;
+    font-weight: 900;
+    color: var(--navy-900);
+  }
+
+  /* 審査所見リスト */
+  .audit-block {
+    border-left: 4px solid var(--blue-600);
+    background: var(--slate-50);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 12px;
+  }
+  .audit-block.danger { border-left-color: var(--red-600); background: #fff5f5; }
+  .audit-block.warn { border-left-color: var(--amber-600); background: #fffbeb; }
+  .audit-block-title { font-size: 0.84rem; font-weight: 800; color: var(--navy-900); margin-bottom: 6px; }
+  .audit-list { margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--navy-800); }
+  .audit-list li { margin-bottom: 6px; line-height: 1.55; }
+
+  /* 償還年数計算式ボックス */
+  .formula-showcase {
+    background: var(--navy-900);
+    color: #fff;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .formula-eq { font-size: 0.82rem; color: var(--slate-200); }
+  .formula-eq strong { color: #fff; font-size: 0.95rem; }
+  .formula-res { font-size: 1.3rem; font-weight: 900; color: #38bdf8; }
+
+  /* A4印刷用スタイル（入力欄を隠し、A4縦1〜2枚に稟議書フォーマットで出力） */
+  .print-only-header { display: none; }
+  @media print {
+    body { background: #fff !important; color: #000 !important; font-size: 9pt; }
+    .no-print, .topbar { display: none !important; }
+    .print-only-header {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .main-container {
+      display: block !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .panel {
+      box-shadow: none !important;
+      border: 1px solid #94a3b8 !important;
+      margin-bottom: 10px !important;
+      page-break-inside: avoid;
+    }
+    .panel-header { padding: 6px 12px !important; background: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .panel-body { padding: 10px 12px !important; }
+    .rating-hero {
+      padding: 12px 16px !important;
+      margin-bottom: 10px !important;
+      background: #0f172a !important;
+      color: #fff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .kpi-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; margin-bottom: 10px !important; }
+    .kpi-card { padding: 8px 10px !important; border: 1px solid #cbd5e1 !important; }
+    .kpi-main { font-size: 1.05rem !important; }
+    .t-bs-wrapper { grid-template-columns: 1fr 1fr !important; page-break-inside: avoid; }
+    .t-bs-col-header, .formula-showcase { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4 portrait; margin: 10mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- トップナビゲーション -->
+<header class="topbar no-print">
+  <div class="brand-wrap">
+    <span class="brand-badge">BANK CREDIT AUDIT ENGINE</span>
+    <div>
+      <h1 class="brand-title">実態財務アナライザー Pro</h1>
+      <p class="brand-sub">銀行融資審査・M&A財務DD準拠 ｜ 3期B/S・P/L不良資産強制控除 ＆ 実態債務償還年数算出システム</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="btn-top" onclick="loadSample('healthy')">サンプル1：健全製造業</button>
+    <button class="btn-top" onclick="loadSample('window_dressing')">サンプル2：在庫・売掛粉飾疑い企業</button>
+    <button class="btn-top btn-top-primary" onclick="window.print()">🖨️ A4審査稟議レポート印刷 / PDF出力</button>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <!-- ==================== 左カラム：3期決算入力パネル ==================== -->
+  <aside class="no-print">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">⚙️ 1. 審査対象企業・業種基準の設定</h2>
+        <span style="font-size:0.7rem; color:var(--slate-500); font-weight:700;">経産省・財務省統計準拠</span>
+      </div>
+      <div class="panel-body">
+        <div class="control-row">
+          <div class="field-box">
+            <label>対象企業名（印刷レポート見出し用）</label>
+            <input type="text" id="companyName" value="株式会社サンプル製作所" oninput="analyze()">
+          </div>
+          <div class="field-box">
+            <label>詳細業種（15業種分類）</label>
+            <select id="industry" onchange="onIndustryChange()">
+              <optgroup label="製造業・素材">
+                <option value="mfg_machinery">機械・金属加工製造業</option>
+                <option value="mfg_consumer">食品・日用品・消費財製造業</option>
+              </optgroup>
+              <optgroup label="建設・インフラ">
+                <option value="const_general">総合建設（ゼネコン・土木）</option>
+                <option value="const_interior">専門工事・内装・設備工事</option>
+              </optgroup>
+              <optgroup label="流通・小売・卸売">
+                <option value="wholesale_b2b">B2B専門卸売業</option>
+                <option value="retail_store">実店舗型小売（スーパー・専門店）</option>
+                <option value="ec_retail">EC・ネット通販業</option>
+              </optgroup>
+              <optgroup label="IT・通信・サービス">
+                <option value="it_saas">SaaS・ソフトウェア開発</option>
+                <option value="it_ses">SES・受託システム開発</option>
+                <option value="service_b2b">B2B専門サービス・コンサル</option>
+              </optgroup>
+              <optgroup label="飲食・宿泊・生活">
+                <option value="restaurant">飲食・居酒屋・カフェ</option>
+                <option value="hotel_leisure">ホテル・宿泊・レジャー</option>
+              </optgroup>
+              <optgroup label="不動産・医療介護">
+                <option value="realestate_lease">不動産賃貸・管理業</option>
+                <option value="realestate_sales">建売・不動産分譲開発業</option>
+                <option value="medical_nursing">医療法人・介護福祉事業</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- 業種平均の手動微調整（オーバーライド）ボックス -->
+        <div class="bench-override">
+          <div class="bench-override-title">
+            <span>📊 業種平均基準値（この2倍を超えると100%不良資産認定）</span>
+            <span id="statSourceLabel">出典: 中小企業実態基本調査/法人企業統計</span>
+          </div>
+          <div class="bench-grid">
+            <div>
+              <label>平均 売上債権回転(月)</label>
+              <input type="number" step="0.1" id="bench_ar" value="2.2" oninput="analyze()">
+            </div>
+            <div>
+              <label>平均 棚卸資産回転(月)</label>
+              <input type="number" step="0.1" id="bench_inv" value="1.5" oninput="analyze()">
+            </div>
+            <div>
+              <label>業界 標準粗利率(%)</label>
+              <input type="number" step="1" id="bench_gp" value="24" oninput="analyze()">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3期数値入力テーブル -->
+        <table class="fin-input-table">
+          <thead>
+            <tr>
+              <th>勘定科目（単位：百万円）</th>
+              <th>前々期(3期前)</th>
+              <th>前期(2期前)</th>
+              <th>当期(直近)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- P/L -->
+            <tr class="cat-row"><td colspan="4">【 損益計算書 (P/L) 】</td></tr>
+            <tr>
+              <td>売上高（年商）</td>
+              <td><input type="number" id="sales_0" value="500" oninput="analyze()"></td>
+              <td><input type="number" id="sales_1" value="550" oninput="analyze()"></td>
+              <td><input type="number" id="sales_2" value="600" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>売上原価 <span class="rule-tag">+不良在庫加算</span></td>
+              <td><input type="number" id="cost_0" value="380" oninput="analyze()"></td>
+              <td><input type="number" id="cost_1" value="420" oninput="analyze()"></td>
+              <td><input type="number" id="cost_2" value="450" oninput="analyze()"></td>
+            </tr>
+            <tr class="auto-row">
+              <td>売上総利益（自動計算）</td>
+              <td id="gp_disp_0">120</td>
+              <td id="gp_disp_1">130</td>
+              <td id="gp_disp_2">150</td>
+            </tr>
+            <tr>
+              <td>営業利益</td>
+              <td><input type="number" id="op_0" value="22" oninput="analyze()"></td>
+              <td><input type="number" id="op_1" value="26" oninput="analyze()"></td>
+              <td><input type="number" id="op_2" value="30" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>経常利益 <span class="rule-tag">実態修正対象</span></td>
+              <td><input type="number" id="ord_0" value="18" oninput="analyze()"></td>
+              <td><input type="number" id="ord_1" value="22" oninput="analyze()"></td>
+              <td><input type="number" id="ord_2" value="26" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>当期純利益</td>
+              <td><input type="number" id="ni_0" value="11" oninput="analyze()"></td>
+              <td><input type="number" id="ni_1" value="14" oninput="analyze()"></td>
+              <td><input type="number" id="ni_2" value="17" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>減価償却費</td>
+              <td><input type="number" id="dep_0" value="14" oninput="analyze()"></td>
+              <td><input type="number" id="dep_1" value="14" oninput="analyze()"></td>
+              <td><input type="number" id="dep_2" value="15" oninput="analyze()"></td>
+            </tr>
+
+            <!-- B/S 流動資産 -->
+            <tr class="cat-row"><td colspan="4">【 B/S 資産の部（流動資産） 】</td></tr>
+            <tr>
+              <td>現金（手元現金）<span class="rule-tag">売上7日分超カット</span></td>
+              <td><input type="number" id="cash_0" value="4" oninput="analyze()"></td>
+              <td><input type="number" id="cash_1" value="8" oninput="analyze()"></td>
+              <td><input type="number" id="cash_2" value="22" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>預金（銀行預金）</td>
+              <td><input type="number" id="depo_0" value="65" oninput="analyze()"></td>
+              <td><input type="number" id="depo_1" value="60" oninput="analyze()"></td>
+              <td><input type="number" id="depo_2" value="58" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>売上債権（手形・売掛・電債）<span class="rule-tag">2倍超カット</span></td>
+              <td><input type="number" id="rec_0" value="110" oninput="analyze()"></td>
+              <td><input type="number" id="rec_1" value="160" oninput="analyze()"></td>
+              <td><input type="number" id="rec_2" value="250" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>商品・棚卸資産（在庫・仕掛）<span class="rule-tag">2倍超カット</span></td>
+              <td><input type="number" id="inv_0" value="65" oninput="analyze()"></td>
+              <td><input type="number" id="inv_1" value="110" oninput="analyze()"></td>
+              <td><input type="number" id="inv_2" value="185" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>短期貸付金 <span class="rule-tag">前期同額は全額不良</span></td>
+              <td><input type="number" id="sloan_0" value="12" oninput="analyze()"></td>
+              <td><input type="number" id="sloan_1" value="15" oninput="analyze()"></td>
+              <td><input type="number" id="sloan_2" value="15" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>役員貸付金・仮払金 <span class="rule-tag">100%不良</span></td>
+              <td><input type="number" id="odir_0" value="5" oninput="analyze()"></td>
+              <td><input type="number" id="odir_1" value="8" oninput="analyze()"></td>
+              <td><input type="number" id="odir_2" value="12" oninput="analyze()"></td>
+            </tr>
+
+            <!-- B/S 固定資産 -->
+            <tr class="cat-row"><td colspan="4">【 B/S 資産の部（固定資産） 】</td></tr>
+            <tr>
+              <td>建物（付属設備含）<span class="rule-tag">前期同額は4%減額</span></td>
+              <td><input type="number" id="bldg_0" value="105" oninput="analyze()"></td>
+              <td><input type="number" id="bldg_1" value="100" oninput="analyze()"></td>
+              <td><input type="number" id="bldg_2" value="100" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>土地</td>
+              <td><input type="number" id="land_0" value="120" oninput="analyze()"></td>
+              <td><input type="number" id="land_1" value="120" oninput="analyze()"></td>
+              <td><input type="number" id="land_2" value="120" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>機械・その他有形無形固定資産</td>
+              <td><input type="number" id="mach_0" value="40" oninput="analyze()"></td>
+              <td><input type="number" id="mach_1" value="38" oninput="analyze()"></td>
+              <td><input type="number" id="mach_2" value="35" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>電話加入権・ゴルフ会員権等 <span class="rule-tag">100%不良</span></td>
+              <td><input type="number" id="rights_0" value="3" oninput="analyze()"></td>
+              <td><input type="number" id="rights_1" value="3" oninput="analyze()"></td>
+              <td><input type="number" id="rights_2" value="3" oninput="analyze()"></td>
+            </tr>
+            <tr class="auto-row">
+              <td>帳簿上の資産合計（自動集計）</td>
+              <td id="ta_disp_0">-</td>
+              <td id="ta_disp_1">-</td>
+              <td id="ta_disp_2">-</td>
+            </tr>
+
+            <!-- B/S 負債・純資産 -->
+            <tr class="cat-row"><td colspan="4">【 B/S 負債・純資産の部 】</td></tr>
+            <tr>
+              <td>買入債務（買掛・支払手形・未成受入）</td>
+              <td><input type="number" id="pay_0" value="65" oninput="analyze()"></td>
+              <td><input type="number" id="pay_1" value="70" oninput="analyze()"></td>
+              <td><input type="number" id="pay_2" value="75" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>短期借入金（1年内返済長期含）</td>
+              <td><input type="number" id="sdebt_0" value="110" oninput="analyze()"></td>
+              <td><input type="number" id="sdebt_1" value="140" oninput="analyze()"></td>
+              <td><input type="number" id="sdebt_2" value="190" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>長期借入金・社債</td>
+              <td><input type="number" id="ldebt_0" value="230" oninput="analyze()"></td>
+              <td><input type="number" id="ldebt_1" value="270" oninput="analyze()"></td>
+              <td><input type="number" id="ldebt_2" value="350" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>リース債務 <span class="rule-tag">+有利子負債加算</span></td>
+              <td><input type="number" id="lease_0" value="10" oninput="analyze()"></td>
+              <td><input type="number" id="lease_1" value="12" oninput="analyze()"></td>
+              <td><input type="number" id="lease_2" value="15" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>役員借入金 <span class="rule-tag">-有利子負債減算</span></td>
+              <td><input type="number" id="ydir_0" value="30" oninput="analyze()"></td>
+              <td><input type="number" id="ydir_1" value="30" oninput="analyze()"></td>
+              <td><input type="number" id="ydir_2" value="30" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>その他負債（未払金・預り金等）</td>
+              <td><input type="number" id="oliab_0" value="24" oninput="analyze()"></td>
+              <td><input type="number" id="oliab_1" value="25" oninput="analyze()"></td>
+              <td><input type="number" id="oliab_2" value="20" oninput="analyze()"></td>
+            </tr>
+            <tr>
+              <td>純資産合計（帳簿自己資本）</td>
+              <td><input type="number" id="nass_0" value="90" oninput="analyze()"></td>
+              <td><input type="number" id="nass_1" value="105" oninput="analyze()"></td>
+              <td><input type="number" id="nass_2" value="120" oninput="analyze()"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI JSON一括インポート -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">🤖 2. AI連携（決算書PDFからJSON一括読込）</h2>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:0.75rem; color:var(--slate-600); margin-bottom:6px;">
+          決算書画像をAIに読み取らせたJSONデータを貼り付けると、全項目へ一括反映されます。
+        </div>
+        <textarea id="jsonInput" style="width:100%; height:64px; font-size:0.75rem; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-family:monospace;" placeholder='{"sales":[500,550,600],"cost":[380,420,450],"op":[22,26,30],"ord":[18,22,26],"ni":[11,14,17],"dep":[14,14,15],"cash":[4,8,22],"depo":[65,60,58],"rec":[110,160,250],"inv":[65,110,185],"sloan":[12,15,15],"odir":[5,8,12],"bldg":[105,100,100],"land":[120,120,120],"mach":[40,38,35],"rights":[3,3,3],"pay":[65,70,75],"sdebt":[110,140,190],"ldebt":[230,270,350],"lease":[10,12,15],"ydir":[30,30,30],"oliab":[24,25,20],"nass":[90,105,120]}'></textarea>
+        <button class="btn-top" style="width:100%; margin-top:8px; background:var(--navy-900); color:#fff;" onclick="importJSON()">JSONデータを反映する</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== 右カラム：実態査定レポート（印刷対象） ==================== -->
+  <main>
+    <!-- 印刷時のみ表示される稟議書風ヘッダー -->
+    <div class="print-only-header">
+      <div>
+        <div style="font-size:9pt; color:#475569; font-weight:700;">CONFIDENTIAL / 銀行自己査定・実態財務デューデリジェンス報告書</div>
+        <div id="printCompanyTitle" style="font-size:16pt; font-weight:900; color:#0f172a;">株式会社サンプル製作所</div>
+      </div>
+      <div style="text-align:right; font-size:8.5pt; color:#475569;">
+        <div>対象業種：<strong id="printIndustryName">-</strong></div>
+        <div>単位：百万円（端数四捨五入）</div>
+      </div>
+    </div>
+
+    <!-- 総合銀行格付けバナー -->
+    <div class="rating-hero" id="ratingHero">
+      <div>
+        <div class="rating-meta" id="heroMeta">BANK SELF-ASSESSMENT / 実態財務ベースの模擬債務者区分</div>
+        <div class="rating-main-title" id="bankRankTitle">判定中...</div>
+        <div class="rating-desc" id="bankRankSub"></div>
+      </div>
+      <div class="rating-score-box">
+        <div class="rating-score-label">実態格付ランク</div>
+        <div class="rating-score-val" id="bankScoreBadge">-</div>
+      </div>
+    </div>
+
+    <!-- 6大コアKPI -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- 1. 左右対照（T字勘定）による「実態貸借対照表（実態B/S）」 -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">⚖️ 1. 引き直し後の「実態貸借対照表（T字B/S対照表）」（当期・単位：百万円）</h2>
+        <span style="font-size:0.74rem; color:var(--red-600); font-weight:800;" id="totalCutSummary">不良資産控除額 合計：- 百万円</span>
+      </div>
+      <div class="panel-body">
+        <div class="t-bs-wrapper">
+          <!-- 左側：資産の部 -->
+          <div class="t-bs-left">
+            <div class="t-bs-col-header">
+              <span>【 資産の部（Assets） 】</span>
+              <span>帳簿 ➔ 不良否認 ➔ 実態価値</span>
+            </div>
+            <table class="t-bs-table">
+              <thead>
+                <tr>
+                  <th>勘定科目・査定根拠</th>
+                  <th>帳簿額</th>
+                  <th>不良資産認定</th>
+                  <th>実態査定額</th>
+                </tr>
+              </thead>
+              <tbody id="tBsAssetsBody"></tbody>
+            </table>
+          </div>
+          <!-- 右側：負債・純資産の部 -->
+          <div class="t-bs-right">
+            <div class="t-bs-col-header">
+              <span>【 負債・純資産の部（Liabilities & Equity） 】</span>
+              <span>帳簿 ➔ 負債調整・毀損控除 ➔ 実態</span>
+            </div>
+            <table class="t-bs-table">
+              <thead>
+                <tr>
+                  <th>勘定科目・査定根拠</th>
+                  <th>帳簿額</th>
+                  <th>査定加減算</th>
+                  <th>実態査定額</th>
+                </tr>
+              </thead>
+              <tbody id="tBsLiabBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 損益計算書（P/L）の実態引き直し ＆ 債務償還年数の計算内訳 -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">⏳ 2. 損益計算書（P/L）の実態修正 ＆ 実態債務償還年数の算出内訳</h2>
+        <span style="font-size:0.73rem; color:var(--slate-500); font-weight:700;">不良棚卸資産の売上原価算入・建物償却不足(4%)反映済</span>
+      </div>
+      <div class="panel-body">
+        <!-- 償還年数計算式の明示ボックス -->
+        <div class="formula-showcase">
+          <div class="formula-eq" id="repayFormulaText"></div>
+          <div class="formula-res" id="repayFormulaResult">- 年</div>
+        </div>
+
+        <!-- 3期トレンド＋当期実態引き直し比較テーブル -->
+        <table class="std-table">
+          <thead>
+            <tr>
+              <th>P/L・CF・運転資金項目</th>
+              <th>前々期(帳簿)</th>
+              <th>前期(帳簿)</th>
+              <th>当期(表面帳簿)</th>
+              <th>実態修正額</th>
+              <th>当期(実態査定後)</th>
+            </tr>
+          </thead>
+          <tbody id="plCompareBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. 銀行融資審査部・M&A DD目線での詳細査定レポート -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">🏦 3. 銀行融資審査部・査定役席による実態診断レポート（3期トレンド＆業種特性）</h2>
+      </div>
+      <div class="panel-body">
+        <div class="audit-block danger">
+          <div class="audit-block-title">🚨 貸借対照表（B/S）・損益計算書（P/L）の不良資産認定と修正根拠</div>
+          <ul class="audit-list" id="auditReasonList"></ul>
+        </div>
+
+        <div class="audit-block warn">
+          <div class="audit-block-title">📈 3期推移から検出された財務トレンド・資金繰り変調シグナル</div>
+          <ul class="audit-list" id="trendSignalList"></ul>
+        </div>
+
+        <div class="audit-block">
+          <div class="audit-block-title" id="industryPointHeader">🏭 業種別の運転資金構造・銀行審査の急所</div>
+          <ul class="audit-list" id="industryAuditList"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// 経済産業省「中小企業実態基本調査」・財務省「法人企業統計（中小企業帯）」に基づく15業種基準データ
+const industryDatabase = {
+  mfg_machinery: {
+    name: "機械・金属加工製造業",
+    arAvg: 2.2, invAvg: 1.5, gpTarget: 24,
+    wcNote: "製造期間中の仕掛品・原材料と売掛サイト（手形・電債含む）が先行するため、売上拡大局面では実態運転資金が膨らみやすい構造です。受注減局面での固定費（減価償却・労務費）負担と、特注仕掛品の不良在庫化が最大の審査ポイントです。"
+  },
+  mfg_consumer: {
+    name: "食品・日用品・消費財製造業",
+    arAvg: 1.5, invAvg: 0.9, gpTarget: 30,
+    wcNote: "賞味期限・使用期限があるため本来は在庫回転が速い（平均0.9ヶ月）業種です。回転期間が1.8ヶ月（2倍）を超えている場合、廃棄対象のデッドストックがB/Sに放置されていると判断されます。"
+  },
+  const_general: {
+    name: "総合建設（ゼネコン・土木）",
+    arAvg: 2.0, invAvg: 1.5, gpTarget: 16,
+    wcNote: "【建設業特有の運転資金】棚卸資産にあたる「未成工事支出金」には、赤字工事の原価を次期へ飛ばす粉飾が最も混入しやすいです。また負債側の「未成工事受入金（着工金・中間金）」を買入債務とあわせて控除したネット先行資金で資金繰りを査定します。"
+  },
+  const_interior: {
+    name: "専門工事・内装・設備工事",
+    arAvg: 1.9, invAvg: 0.6, gpTarget: 22,
+    wcNote: "工期が比較的短いため、期末に未成工事支出金（在庫）が1.2ヶ月（平均0.6ヶ月の2倍）を超えて残っている場合は、元請けとの検収トラブルか原価の付け替えが強く疑われます。外注費の支払サイトが先行するため手元預金水準が命綱です。"
+  },
+  wholesale_b2b: {
+    name: "B2B専門卸売業",
+    arAvg: 2.1, invAvg: 1.1, gpTarget: 15,
+    wcNote: "薄利多売で「売上債権＋在庫－買入債務」の経常運転資金が巨額になりやすい業種です。売掛金の焦げ付き1件で数年分の利益が吹き飛ぶため、平均2.1ヶ月の2倍（4.2ヶ月）を超える債権は審査上100%回収不能とみなします。"
+  },
+  retail_store: {
+    name: "実店舗型小売（スーパー・専門店）",
+    arAvg: 0.4, invAvg: 1.2, gpTarget: 28,
+    wcNote: "日銭（現金・クレカ決済）商売のため、売上債権は信販会社の入金待ち分（0.4ヶ月程度）しか発生せず、本来「買掛金 ＞ 売掛金＋在庫」のマイナス運転資金で回る業種です。短期借入金が膨らんでいる場合は過去の赤字補填（ころがし融資）です。"
+  },
+  ec_retail: {
+    name: "EC・ネット通販業",
+    arAvg: 0.8, invAvg: 1.6, gpTarget: 42,
+    wcNote: "モール（Amazon・楽天等）からの入金サイクルは速いものの、海外OEM等のロット仕入れで在庫が先行します。在庫が3.2ヶ月（平均1.6ヶ月の2倍）を超えている場合、広告費（CPA）高騰で売れ残った不良在庫の山と判定されます。"
+  },
+  it_saas: {
+    name: "SaaS・ソフトウェア開発",
+    arAvg: 1.3, invAvg: 0.2, gpTarget: 70,
+    wcNote: "物理的な在庫を持たないため運転資金は極めて軽い業種です。もし棚卸資産（仕掛品）や無形固定資産（ソフトウェア仮勘定）が多額に計上されている場合、エンジニア人件費を費用処理せず資産に逃がした利益かさ上げ（粉飾）を疑います。"
+  },
+  it_ses: {
+    name: "SES・受託システム開発",
+    arAvg: 1.6, invAvg: 0.3, gpTarget: 23,
+    wcNote: "エンジニアへの給与支払い（翌月）とクライアントからの売掛回収（翌々月）のサイト差（約1〜1.5ヶ月分の人件費）が正常な運転資金です。仕掛品が0.6ヶ月を超えて滞留している場合は検収遅延・炎上案件の原価滞留リスクがあります。"
+  },
+  service_b2b: {
+    name: "B2B専門サービス・コンサル",
+    arAvg: 1.5, invAvg: 0.2, gpTarget: 50,
+    wcNote: "在庫がほぼゼロで粗利率が高いため、黒字であればキャッシュがそのまま預金として積み上がるはずです。にもかかわらず借入金が減っていない場合、役員貸付金や仮払金、あるいは不透明な投資・関連会社へ資金が流出しています。"
+  },
+  restaurant: {
+    name: "飲食・居酒屋・カフェ",
+    arAvg: 0.2, invAvg: 0.2, gpTarget: 65,
+    wcNote: "完全な日銭商売であり、食材在庫も数日〜1週間分（0.2ヶ月）しか持てない業種です。手元現金が売上1週間分を超えて帳簿に残っている場合は架空現金（使途不明金）、在庫が0.4ヶ月を超えている場合は架空棚卸による粉飾と即断されます。"
+  },
+  hotel_leisure: {
+    name: "ホテル・宿泊・レジャー",
+    arAvg: 0.6, invAvg: 0.3, gpTarget: 60,
+    wcNote: "運転資金ではなく、建物・設備の巨額な長期借入金を「経常利益＋減価償却費」のキャッシュフローで何年で償還できるかがすべてです。建物が前期同額で据え置かれている場合（償却不足）は銀行格付けが大幅に引き下げられます。"
+  },
+  realestate_lease: {
+    name: "不動産賃貸・管理業",
+    arAvg: 0.4, invAvg: 0.2, gpTarget: 55,
+    wcNote: "【不動産賃貸の特性】前受家賃・敷金が入るため運転資金はほぼ不要です。審査の核心は「保有土地・建物の時価（含み損益）」と「長期借入金に対するキャッシュフロー償還年数（目安12〜15年以内）」になります。"
+  },
+  realestate_sales: {
+    name: "建売・不動産分譲開発業",
+    arAvg: 0.5, invAvg: 6.5, gpTarget: 20,
+    wcNote: "【不動産分譲の運転資金特性】仕入れた「販売用不動産（土地・建物）」がすべて棚卸資産（平均6.5ヶ月）に計上され、それに対応する「プロジェクト別短期・長期借入金」が負債に立ちます。実態運転資金（販売用不動産）を借入金から控除した残額が、プロジェクト見合い外の裸の借入として厳しく審査されます。"
+  },
+  medical_nursing: {
+    name: "医療法人・介護福祉事業",
+    arAvg: 2.0, invAvg: 0.3, gpTarget: 38,
+    wcNote: "社保・国保連からの診療報酬・介護報酬の入金サイトが約2ヶ月固定のため、売掛金2.0ヶ月分は確実な優良債権です。一方で「理事長・役員への貸付金や仮払金」の計上に対しては、銀行および監督官庁から極めて厳しい目が向けられます。"
+  }
+};
+
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? (parseFloat(el.value) || 0) : 0;
+}
+
+function fmt(num, digits = 1) {
+  if (isNaN(num)) return "0.0";
+  return Number(num).toLocaleString("ja-JP", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function onIndustryChange() {
+  const indKey = document.getElementById("industry").value;
+  const prof = industryDatabase[indKey] || industryDatabase.mfg_machinery;
+  document.getElementById("bench_ar").value = prof.arAvg;
+  document.getElementById("bench_inv").value = prof.invAvg;
+  document.getElementById("bench_gp").value = prof.gpTarget;
+  analyze();
+}
+
+function analyze() {
+  const indKey = document.getElementById("industry").value;
+  const prof = industryDatabase[indKey] || industryDatabase.mfg_machinery;
+  const arAvg = parseFloat(document.getElementById("bench_ar").value) || prof.arAvg;
+  const invAvg = parseFloat(document.getElementById("bench_inv").value) || prof.invAvg;
+  const gpTarget = parseFloat(document.getElementById("bench_gp").value) || prof.gpTarget;
+
+  // 印刷用タイトル反映
+  document.getElementById("printCompanyTitle").innerText = document.getElementById("companyName").value || "対象企業";
+  document.getElementById("printIndustryName").innerText = `${prof.name}（基準: 売掛${arAvg}ヶ月 / 在庫${invAvg}ヶ月）`;
+
+  // 3期データの取得 (0:前々期, 1:前期, 2:当期)
+  const sales = [v("sales_0"), v("sales_1"), v("sales_2")];
+  const cost  = [v("cost_0"),  v("cost_1"),  v("cost_2")];
+  const gp    = [sales[0] - cost[0], sales[1] - cost[1], sales[2] - cost[2]];
+  const op    = [v("op_0"),    v("op_1"),    v("op_2")];
+  const ord   = [v("ord_0"),   v("ord_1"),   v("ord_2")];
+  const ni    = [v("ni_0"),    v("ni_1"),    v("ni_2")];
+  const dep   = [v("dep_0"),   v("dep_1"),   v("dep_2")];
+
+  const cash   = [v("cash_0"),   v("cash_1"),   v("cash_2")];
+  const depo   = [v("depo_0"),   v("depo_1"),   v("depo_2")];
+  const rec    = [v("rec_0"),    v("rec_1"),    v("rec_2")];
+  const inv    = [v("inv_0"),    v("inv_1"),    v("inv_2")];
+  const sloan  = [v("sloan_0"),  v("sloan_1"),  v("sloan_2")];
+  const odir   = [v("odir_0"),   v("odir_1"),   v("odir_2")];
+  const bldg   = [v("bldg_0"),   v("bldg_1"),   v("bldg_2")];
+  const land   = [v("land_0"),   v("land_1"),   v("land_2")];
+  const mach   = [v("mach_0"),   v("mach_1"),   v("mach_2")];
+  const rights = [v("rights_0"), v("rights_1"), v("rights_2")];
+
+  const pay   = [v("pay_0"),   v("pay_1"),   v("pay_2")];
+  const sdebt = [v("sdebt_0"), v("sdebt_1"), v("sdebt_2")];
+  const ldebt = [v("ldebt_0"), v("ldebt_1"), v("ldebt_2")];
+  const lease = [v("lease_0"), v("lease_1"), v("lease_2")];
+  const ydir  = [v("ydir_0"),  v("ydir_1"),  v("ydir_2")];
+  const oliab = [v("oliab_0"), v("oliab_1"), v("oliab_2")];
+  const nass  = [v("nass_0"),  v("nass_1"),  v("nass_2")];
+
+  // 自動計算セルの表示更新
+  const ta = [0, 1, 2].map(i => cash[i] + depo[i] + rec[i] + inv[i] + sloan[i] + odir[i] + bldg[i] + land[i] + mach[i] + rights[i]);
+  [0, 1, 2].forEach(i => {
+    document.getElementById(`gp_disp_${i}`).innerText = fmt(gp[i], 0);
+    document.getElementById(`ta_disp_${i}`).innerText = fmt(ta[i], 0);
+  });
+
+  // =========================================================================
+  // 【基本原則に基づくB/S不良資産認定ロジック（当期 index=2）】
+  // =========================================================================
+  const curSales = sales[2];
+  const monthlySales = curSales > 0 ? curSales / 12 : 0;
+
+  // 1. 現金：売上の1週間分 (売上 / 365 * 7) を超える現金は不良資産
+  const cashAllowable = curSales > 0 ? (curSales / 365) * 7 : 0;
+  const badCash = Math.max(0, cash[2] - cashAllowable);
+  const realCash = cash[2] - badCash;
+
+  // 2. 売上債権：業種平均売上債権回転期間の2倍を超える分は不良資産
+  const arLimitMonths = arAvg * 2;
+  const arAllowable = monthlySales * arLimitMonths;
+  const badAR = Math.max(0, rec[2] - arAllowable);
+  const realAR = rec[2] - badAR;
+  const curArMonths = monthlySales > 0 ? rec[2] / monthlySales : 0;
+
+  // 3. 商品・棚卸資産：業種平均棚卸資産回転期間の2倍を超える分は不良資産
+  const invLimitMonths = invAvg * 2;
+  const invAllowable = monthlySales * invLimitMonths;
+  const badInv = Math.max(0, inv[2] - invAllowable);
+  const realInv = inv[2] - badInv;
+  const curInvMonths = monthlySales > 0 ? inv[2] / monthlySales : 0;
+
+  // 4. 短期貸付金：計上額が前年同額であった場合、全て不良資産（>0かつ当期===前期）
+  const isSloanSame = (sloan[2] > 0 && sloan[2] === sloan[1]);
+  const badSloan = isSloanSame ? sloan[2] : 0;
+  const realSloan = sloan[2] - badSloan;
+
+  // 5. 役員貸付金・仮払金：全て資産価値なし（100%不良資産）
+  const badOdir = Math.max(0, odir[2]);
+  const realOdir = 0;
+
+  // 6. 建物：前年同額であった場合、償却不足として4%マイナス（増加していたら新規取得につき修正なし）
+  const isBldgSame = (bldg[2] > 0 && bldg[2] === bldg[1]);
+  const badBldg = isBldgSame ? bldg[2] * 0.04 : 0;
+  const realBldg = bldg[2] - badBldg;
+
+  // 7. 電話加入権・ゴルフ会員権等：全て資産価値なし（100%不良資産）
+  const badRights = Math.max(0, rights[2]);
+  const realRights = 0;
+
+  // 不良資産認定合計 ＆ 実態純資産
+  const totalBadAssets = badCash + badAR + badInv + badSloan + badOdir + badBldg + badRights;
+  const realTotalAssets = ta[2] - totalBadAssets;
+  const realNetAssets = nass[2] - totalBadAssets;
+
+  // =========================================================================
+  // 【P/L修正・負債再定義・実態債務償還年数の算出】
+  // =========================================================================
+  // 売上原価＝不良棚卸資産を加算 / 実態経常利益＝不良棚卸資産と建物償却不足(4%)を減算
+  const realCost = cost[2] + badInv;
+  const realGP = curSales - realCost;
+  const realOP = op[2] - badInv - badBldg;
+  const realOrd = ord[2] - badInv - badBldg;
+
+  // 実態有利子負債 ＝ 短期借入金 ＋ 長期借入金 ＋ リース債務 － 役員借入金
+  const bookDebt = sdebt[2] + ldebt[2];
+  const realDebt = Math.max(0, sdebt[2] + ldebt[2] + lease[2] - ydir[2]);
+
+  // 実態運転資金 ＝ 実態売上債権 ＋ 実態棚卸資産 － 買入債務
+  const bookWC = rec[2] + inv[2] - pay[2];
+  const realWC = realAR + realInv - pay[2];
+
+  // 償還年数 ＝ (有利子負債 ＋ リース債務 － 役員借入金 － 実態運転資金) / (実態経常利益 ＋ 減価償却費)
+  const repayNumerator = realDebt - realWC;
+  const repayDenominator = realOrd + dep[2];
+  let repayYears = 0;
+  let repayDisplay = "";
+  if (repayNumerator <= 0) {
+    repayYears = 0;
+    repayDisplay = "0.0 年（要返済債務なし）";
+  } else if (repayDenominator <= 0) {
+    repayYears = 99.9;
+    repayDisplay = "償還不能（実態CFマイナス）";
+  } else {
+    repayYears = repayNumerator / repayDenominator;
+    repayDisplay = fmt(repayYears, 1) + " 年";
+  }
+
+  // 表面上の償還年数（比較用）
+  const surfaceNum = Math.max(0, bookDebt - bookWC);
+  const surfaceDen = ord[2] + dep[2];
+  const surfaceYears = surfaceNum <= 0 ? 0 : (surfaceDen > 0 ? surfaceNum / surfaceDen : 99.9);
+
+  // =========================================================================
+  // UI描画 1：T字型 実態貸借対照表（左右対照B/S）
+  // =========================================================================
+  document.getElementById("totalCutSummary").innerText = `不良資産強制控除額 合計：▲${fmt(totalBadAssets, 1)} 百万円`;
+
+  const assetRows = [
+    { sec: "【流動資産】" },
+    { name: "現金（手元現金）", book: cash[2], cut: badCash, real: realCash, note: badCash > 0 ? `売上7日分(${fmt(cashAllowable,1)})超過カット` : "" },
+    { name: "預金（銀行預金）", book: depo[2], cut: 0, real: depo[2], note: "" },
+    { name: "売上債権（手形・売掛・電債）", book: rec[2], cut: badAR, real: realAR, note: badAR > 0 ? `基準2倍(${fmt(arLimitMonths,1)}月=${fmt(arAllowable,1)})超過` : "" },
+    { name: "商品・棚卸資産", book: inv[2], cut: badInv, real: realInv, note: badInv > 0 ? `基準2倍(${fmt(invLimitMonths,1)}月=${fmt(invAllowable,1)})超過` : "" },
+    { name: "短期貸付金", book: sloan[2], cut: badSloan, real: realSloan, note: badSloan > 0 ? "前期同額のため100%不良認定" : "" },
+    { name: "役員貸付金・仮払金", book: odir[2], cut: badOdir, real: realOdir, note: badOdir > 0 ? "原則100%資産価値なし" : "" },
+    { sec: "【固定資産】" },
+    { name: "建物（付属設備含）", book: bldg[2], cut: badBldg, real: realBldg, note: badBldg > 0 ? "前期同額・償却不足4%控除" : "" },
+    { name: "土地", book: land[2], cut: 0, real: land[2], note: "" },
+    { name: "機械・その他固定資産", book: mach[2], cut: 0, real: mach[2], note: "" },
+    { name: "電話加入権・会員権等", book: rights[2], cut: badRights, real: realRights, note: badRights > 0 ? "原則100%資産価値なし" : "" }
+  ];
+
+  let assetsHtml = "";
+  assetRows.forEach(r => {
+    if (r.sec) {
+      assetsHtml += `<tr class="sec-row"><td colspan="4">${r.sec}</td></tr>`;
+    } else {
+      assetsHtml += `
+        <tr>
+          <td>${r.name}${r.note ? `<span class="audit-reason">※${r.note}</span>` : ""}</td>
+          <td>${fmt(r.book, 1)}</td>
+          <td class="${r.cut > 0 ? 'val-cut' : ''}">${r.cut > 0 ? '▲' + fmt(r.cut, 1) : '-'}</td>
+          <td class="val-real">${fmt(r.real, 1)}</td>
+        </tr>`;
+    }
+  });
+  assetsHtml += `
+    <tr class="total-row">
+      <td>資産の部 合計</td>
+      <td>${fmt(ta[2], 1)}</td>
+      <td class="val-cut">▲${fmt(totalBadAssets, 1)}</td>
+      <td class="val-real">${fmt(realTotalAssets, 1)}</td>
+    </tr>`;
+  document.getElementById("tBsAssetsBody").innerHTML = assetsHtml;
+
+  // 右側：負債・純資産の部
+  const bookTotalLiab = pay[2] + sdebt[2] + ldebt[2] + lease[2] + ydir[2] + oliab[2];
+  const liabHtml = `
+    <tr class="sec-row"><td colspan="4">【負債の部（有利子負債の実態再定義）】</td></tr>
+    <tr>
+      <td>買入債務（買掛・支払手形）</td>
+      <td>${fmt(pay[2], 1)}</td>
+      <td>-</td>
+      <td class="val-real">${fmt(pay[2], 1)}</td>
+    </tr>
+    <tr>
+      <td>短期借入金（1年内返済含）</td>
+      <td>${fmt(sdebt[2], 1)}</td>
+      <td>有利子負債算入</td>
+      <td class="val-real">${fmt(sdebt[2], 1)}</td>
+    </tr>
+    <tr>
+      <td>長期借入金・社債</td>
+      <td>${fmt(ldebt[2], 1)}</td>
+      <td>有利子負債算入</td>
+      <td class="val-real">${fmt(ldebt[2], 1)}</td>
+    </tr>
+    <tr>
+      <td>リース債務 <span class="audit-reason">※有利子負債へ加算</span></td>
+      <td>${fmt(lease[2], 1)}</td>
+      <td class="val-add">+負債加算</td>
+      <td class="val-real">${fmt(lease[2], 1)}</td>
+    </tr>
+    <tr>
+      <td>役員借入金 <span class="audit-reason">※準自己資本として有利子負債から減算</span></td>
+      <td>${fmt(ydir[2], 1)}</td>
+      <td style="color:var(--emerald-600); font-weight:800;">▲負債控除</td>
+      <td class="val-real">${fmt(ydir[2], 1)}</td>
+    </tr>
+    <tr>
+      <td>その他負債（未払金等）</td>
+      <td>${fmt(oliab[2], 1)}</td>
+      <td>-</td>
+      <td class="val-real">${fmt(oliab[2], 1)}</td>
+    </tr>
+    <tr style="background:#f8fafc; font-weight:800;">
+      <td>【実態有利子負債 小計】<span class="audit-reason">短期+長期+リース-役員借入</span></td>
+      <td>${fmt(bookDebt, 1)}</td>
+      <td>${(lease[2] - ydir[2]) >= 0 ? '+' + fmt(lease[2] - ydir[2], 1) : '▲' + fmt(Math.abs(lease[2] - ydir[2]), 1)}</td>
+      <td class="val-real">${fmt(realDebt, 1)}</td>
+    </tr>
+    <tr class="sec-row"><td colspan="4">【純資産の部（自己資本の実態査定）】</td></tr>
+    <tr class="net-asset-row ${realNetAssets >= 0 ? 'is-positive' : ''}">
+      <td>純資産合計（実態自己資本）<span class="audit-reason">${realNetAssets < 0 ? '🚨 実態債務超過に転落' : '不良資産控除後もプラス維持'}</span></td>
+      <td>${fmt(nass[2], 1)}</td>
+      <td class="val-cut">▲${fmt(totalBadAssets, 1)}</td>
+      <td class="val-real" style="color:${realNetAssets < 0 ? 'var(--red-600)' : 'var(--emerald-600)'}; font-size:0.92rem;">${fmt(realNetAssets, 1)}</td>
+    </tr>
+    <tr class="total-row">
+      <td>負債・純資産 合計</td>
+      <td>${fmt(bookTotalLiab + nass[2], 1)}</td>
+      <td class="val-cut">▲${fmt(totalBadAssets, 1)}</td>
+      <td class="val-real">${fmt(bookTotalLiab + realNetAssets, 1)}</td>
+    </tr>
+  `;
+  document.getElementById("tBsLiabBody").innerHTML = liabHtml;
+
+  // =========================================================================
+  // UI描画 2：償還年数式 ＆ P/L 3期＋実態引き直し比較テーブル
+  // =========================================================================
+  document.getElementById("repayFormulaText").innerHTML = `
+    <strong>実態債務償還年数</strong> ＝
+    分子［ 実態有利子負債 <strong>${fmt(realDebt,1)}</strong> (短借${fmt(sdebt[2],0)}+長借${fmt(ldebt[2],0)}+リース${fmt(lease[2],0)}-役借${fmt(ydir[2],0)}) － 実態運転資金 <strong>${fmt(realWC,1)}</strong> ］
+    ÷ 分母［ 実態経常利益 <strong>${fmt(realOrd,1)}</strong> ＋ 減価償却費 <strong>${fmt(dep[2],1)}</strong> ］
+  `;
+  document.getElementById("repayFormulaResult").innerText = repayDisplay;
+
+  const plRows = [
+    { name: "売上高（年商）", v0: sales[0], v1: sales[1], v2: sales[2], adj: 0, real: sales[2] },
+    { name: "売上原価（＋不良棚卸資産加算）", v0: cost[0], v1: cost[1], v2: cost[2], adj: badInv, real: realCost, isCost: true },
+    { name: "売上総利益（実態粗利）", v0: gp[0], v1: gp[1], v2: gp[2], adj: -badInv, real: realGP },
+    { name: "営業利益（－不良在庫・建物償却不足）", v0: op[0], v1: op[1], v2: op[2], adj: -(badInv + badBldg), real: realOP },
+    { name: "経常利益（実態経常利益）", v0: ord[0], v1: ord[1], v2: ord[2], adj: -(badInv + badBldg), real: realOrd, hi: true },
+    { name: "減価償却費", v0: dep[0], v1: dep[1], v2: dep[2], adj: 0, real: dep[2] },
+    { name: "償還原資CF（経常利益＋減価償却費）", v0: ord[0]+dep[0], v1: ord[1]+dep[1], v2: ord[2]+dep[2], adj: -(badInv + badBldg), real: repayDenominator, hi: true },
+    { name: "運転資金（売上債権＋棚卸資産－買入債務）", v0: rec[0]+inv[0]-pay[0], v1: rec[1]+inv[1]-pay[1], v2: bookWC, adj: -(badAR + badInv), real: realWC }
+  ];
+
+  document.getElementById("plCompareBody").innerHTML = plRows.map(r => {
+    let adjStr = "-";
+    if (r.adj !== 0) {
+      adjStr = (r.adj > 0 ? "+" : "▲") + fmt(Math.abs(r.adj), 1);
+    }
+    return `
+      <tr class="${r.hi ? 'highlight-row' : ''}">
+        <td>${r.name}</td>
+        <td>${fmt(r.v0, 1)}</td>
+        <td>${fmt(r.v1, 1)}</td>
+        <td>${fmt(r.v2, 1)}</td>
+        <td class="${r.adj !== 0 ? 'val-cut' : ''}">${adjStr}</td>
+        <td style="font-weight:900; color:${r.real < 0 ? 'var(--red-600)' : 'var(--navy-900)'};">${fmt(r.real, 1)}</td>
+      </tr>`;
+  }).join("");
+
+  // =========================================================================
+  // UI描画 3：6大KPIカード
+  // =========================================================================
+  const realEqRatio = realTotalAssets > 0 ? (realNetAssets / realTotalAssets) * 100 : -99.9;
+  const surfaceEqRatio = ta[2] > 0 ? (nass[2] / ta[2]) * 100 : 0;
+
+  const kpiData = [
+    {
+      label: "実態債務償還年数 (銀行査定値)",
+      main: repayDisplay,
+      sub: `表面上: ${surfaceYears === 0 ? '0.0年' : (surfaceYears > 50 ? '償還不能' : fmt(surfaceYears,1)+'年')}`,
+      pill: repayNumerator <= 0 || repayYears <= 10 ? "正常圏 (10年以内)" : (repayYears <= 15 ? "要注意 (10〜15年)" : "危険 (15年超/赤字)"),
+      status: repayNumerator <= 0 || repayYears <= 10 ? "good" : (repayYears <= 15 ? "warn" : "danger")
+    },
+    {
+      label: "実態純資産 (不良資産控除後)",
+      main: `${fmt(realNetAssets, 1)} 百万円`,
+      sub: `表面純資産: ${fmt(nass[2], 1)} 百万円`,
+      pill: realNetAssets >= 0 ? `実態自己資本比率 ${fmt(realEqRatio,1)}%` : "🚨 実態債務超過",
+      status: realNetAssets >= 20 ? "good" : (realNetAssets >= 0 ? "warn" : "danger")
+    },
+    {
+      label: "実態経常利益 (P/L修正後)",
+      main: `${fmt(realOrd, 1)} 百万円`,
+      sub: `表面経常利益: ${fmt(ord[2], 1)} 百万円`,
+      pill: realOrd >= 0 ? "実態黒字確保" : "🚨 粉飾剥離で実態赤字",
+      status: realOrd > 0 ? "good" : "danger"
+    },
+    {
+      label: "実態運転資金 (不良債権・在庫除外)",
+      main: `${fmt(realWC, 1)} 百万円`,
+      sub: `表面運転資金: ${fmt(bookWC, 1)} 百万円`,
+      pill: `実態有利子負債: ${fmt(realDebt, 1)}百万`,
+      status: "good"
+    },
+    {
+      label: "売上債権回転期間 (2倍ルール査定)",
+      main: `${fmt(curArMonths, 2)} ヶ月`,
+      sub: `業種平均 ${arAvg}月 / 上限 ${fmt(arLimitMonths,1)}月`,
+      pill: badAR > 0 ? `不良認定 ▲${fmt(badAR,1)}百万円` : "正常回収圏内",
+      status: badAR > 0 ? "danger" : (curArMonths > arAvg * 1.3 ? "warn" : "good")
+    },
+    {
+      label: "棚卸資産回転期間 (2倍ルール査定)",
+      main: `${fmt(curInvMonths, 2)} ヶ月`,
+      sub: `業種平均 ${invAvg}月 / 上限 ${fmt(invLimitMonths,1)}月`,
+      pill: badInv > 0 ? `不良認定 ▲${fmt(badInv,1)}百万円` : "正常在庫圏内",
+      status: badInv > 0 ? "danger" : (curInvMonths > invAvg * 1.3 ? "warn" : "good")
+    }
+  ];
+
+  document.getElementById("kpiGrid").innerHTML = kpiData.map(k => `
+    <div class="kpi-card status-${k.status}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-main">${k.main}</div>
+      <div class="kpi-sub">
+        <span>${k.sub}</span>
+        <span class="pill pill-${k.status}">${k.pill}</span>
+      </div>
+    </div>
+  `).join("");
+
+  // =========================================================================
+  // UI描画 4：審査所見・3期トレンド分析・格付けランク判定
+  // =========================================================================
+  const auditReasons = [];
+  if (badCash > 0) {
+    auditReasons.push(`<strong>【手元現金の不良資産認定：▲${fmt(badCash,1)}百万円】</strong>当期の手元現金（${fmt(cash[2],1)}百万円）が、年間売上高の1週間分（${fmt(cashAllowable,1)}百万円＝売上÷365×7）を超過しています。銀行預金ではなく手元現金として滞留している超過分は、実在性の乏しい架空現金・使途不明金として全額不良資産処理しました。`);
+  } else {
+    auditReasons.push(`<strong>【手元現金：正常】</strong>手元現金（${fmt(cash[2],1)}百万円）は売上の1週間分（${fmt(cashAllowable,1)}百万円）以内に収まっており、不自然な滞留はありません。`);
+  }
+
+  if (badAR > 0) {
+    auditReasons.push(`<strong>【売上債権の2倍超過カット：▲${fmt(badAR,1)}百万円】</strong>売上債権（${fmt(rec[2],1)}百万円 / 回転期間${fmt(curArMonths,2)}ヶ月）が、${prof.name}の平均（${arAvg}ヶ月）の2倍（${fmt(arLimitMonths,1)}ヶ月＝上限${fmt(arAllowable,1)}百万円）を超過しています。長期滞留・回収不能債権（または架空売上）とみなし、超過分を不良資産として控除しました。`);
+  }
+
+  if (badInv > 0) {
+    auditReasons.push(`<strong>【棚卸資産の2倍超過カット＆売上原価への加算：▲${fmt(badInv,1)}百万円】</strong>棚卸資産（${fmt(inv[2],1)}百万円 / 回転期間${fmt(curInvMonths,2)}ヶ月）が、業種平均（${invAvg}ヶ月）の2倍（${fmt(invLimitMonths,1)}ヶ月＝上限${fmt(invAllowable,1)}百万円）を超過しています。不良在庫または利益操作（原価繰り延べ）と認定し、B/Sから削ると同時に<strong>当期の売上原価へ全額加算（実態経常利益からマイナス）</strong>しました。`);
+  }
+
+  if (badBldg > 0) {
+    auditReasons.push(`<strong>【建物の償却不足ペナルティ（4%控除）：▲${fmt(badBldg,1)}百万円】</strong>建物の当期計上額（${fmt(bldg[2],1)}百万円）が前期（${fmt(bldg[1],1)}百万円）と同額で推移しています。利益捻出のための減価償却ストップ（償却不足）と判断し、建物簿価の4%相当を実態純資産および実態経常利益から減算しました。`);
+  } else if (bldg[2] > bldg[1]) {
+    auditReasons.push(`<strong>【建物の増加：修正なし】</strong>建物が前期（${fmt(bldg[1],1)}百万円）から当期（${fmt(bldg[2],1)}百万円）へ増加していますが、新規設備取得・増床によるものと判定し、償却不足ペナルティは適用していません。`);
+  }
+
+  if (badSloan > 0 || badOdir > 0 || badRights > 0) {
+    auditReasons.push(`<strong>【貸付金・仮払金・会員権等の強制カット：計 ▲${fmt(badSloan + badOdir + badRights, 1)}百万円】</strong>${badSloan > 0 ? `短期貸付金が前期同額（${fmt(sloan[2],1)}百万円）で塩漬けのため全額不良認定。` : ""}${badOdir > 0 ? `役員貸付金・仮払金（${fmt(badOdir,1)}百万円）を100%不良認定。` : ""}${badRights > 0 ? `電話加入権・ゴルフ会員権等（${fmt(badRights,1)}百万円）を資産価値ゼロとして控除。` : ""}`);
+  }
+  document.getElementById("auditReasonList").innerHTML = auditReasons.map(x => `<li>${x}</li>`).join("");
+
+  // 3期トレンド分析
+  const trendSignals = [];
+  const salesGrowth = sales[0] > 0 ? ((sales[2] - sales[0]) / sales[0]) * 100 : 0;
+  const arGrowth = rec[0] > 0 ? ((rec[2] - rec[0]) / rec[0]) * 100 : 0;
+  const invGrowth = inv[0] > 0 ? ((inv[2] - inv[0]) / inv[0]) * 100 : 0;
+  const realDebt0 = Math.max(0, sdebt[0] + ldebt[0] + lease[0] - ydir[0]);
+
+  trendSignals.push(`<strong>【3期の売上・利益推移と実態の乖離】</strong>3期間で売上高は ${fmt(sales[0],0)} ➔ ${fmt(sales[1],0)} ➔ ${fmt(sales[2],0)}百万円（${salesGrowth >= 0 ? '+' : ''}${fmt(salesGrowth,1)}%）、表面上の経常利益は ${fmt(ord[0],0)} ➔ ${fmt(ord[1],0)} ➔ ${fmt(ord[2],0)}百万円と推移していますが、当期の実態経常利益は <strong>${fmt(realOrd,1)}百万円</strong>（表面比 ▲${fmt(ord[2]-realOrd,1)}百万円）です。`);
+
+  if (arGrowth > salesGrowth + 15 || invGrowth > salesGrowth + 15) {
+    trendSignals.push(`<strong>【売掛・在庫の異常膨張トレンド】</strong>3期の売上成長率（${fmt(salesGrowth,1)}%）に対し、売上債権が <strong>+${fmt(arGrowth,1)}%</strong>、棚卸資産が <strong>+${fmt(invGrowth,1)}%</strong> と不自然に膨張しています。典型的な「資金が売掛と在庫に寝てしまい、借入金だけが増え続けるキャッシュフロー悪化パターン」です。`);
+  }
+
+  if (sdebt[2] > realWC && realWC > 0) {
+    trendSignals.push(`<strong>【短期借入金の赤字補填化（ころがし融資懸念）】</strong>正常な実態運転資金（${fmt(realWC,1)}百万円）に対し、短期借入金が <strong>${fmt(sdebt[2],1)}百万円</strong>（超過額 ${fmt(sdebt[2]-realWC,1)}百万円）まで膨らんでいます。運転資金名目の短期借入が過去の赤字・不良資産の穴埋めに流用されています。`);
+  }
+
+  trendSignals.push(`<strong>【実態有利子負債の3期推移】</strong>リース債務を加算し役員借入金を控除した実態有利子負債は、前々期 ${fmt(realDebt0,1)}百万円 ➔ 当期 <strong>${fmt(realDebt,1)}百万円</strong>（${realDebt - realDebt0 >= 0 ? '+' : '▲'}${fmt(Math.abs(realDebt - realDebt0),1)}百万円）と推移しています。`);
+  document.getElementById("trendSignalList").innerHTML = trendSignals.map(x => `<li>${x}</li>`).join("");
+
+  // 業種別コメント
+  document.getElementById("industryPointHeader").innerText = `🏭 業種別の運転資金構造・銀行審査の急所（${prof.name}）`;
+  const curGpRate = curSales > 0 ? (realGP / curSales) * 100 : 0;
+  const indList = [
+    `<strong>【業界特性と運転資金の見方】</strong>${prof.wcNote}`,
+    `<strong>【実態粗利率の業界比較】</strong>不良棚卸資産を原価算入した後の「実態売上総利益率」は <strong>${fmt(curGpRate,1)}%</strong>（${prof.name}の目安：${gpTarget}%）です。${curGpRate < gpTarget ? '業界水準を下回っており、原価高騰の価格転嫁遅れまたは在庫水増しの反動が出ています。' : '実態ベースでも業界標準以上の粗利率を確保できています。'}`
+  ];
+  document.getElementById("industryAuditList").innerHTML = indList.map(x => `<li>${x}</li>`).join("");
+
+  // 総合格付けバナーの判定
+  const heroEl = document.getElementById("ratingHero");
+  let rTitle = "", rSub = "", rBadge = "", borderColor = "#3b82f6";
+
+  if (realNetAssets < 0 && (realOrd < 0 || repayYears > 15)) {
+    rTitle = "破綻懸念先 〜 要管理先（実態債務超過・CF不足）";
+    rSub = `表面上は純資産＋${fmt(nass[2],0)}百万円・経常＋${fmt(ord[2],0)}百万円を計上していますが、不良資産（▲${fmt(totalBadAssets,1)}百万円）を剥ぎ取ると「実態純資産 ▲${fmt(Math.abs(realNetAssets),1)}百万円の債務超過」かつ「実態経常利益 ${fmt(realOrd,1)}百万円」に転落します。新規プロパー融資は不可、抜本的な事業再生・M&Aによるスポンサー支援が急務です。`;
+    rBadge = "D〜E";
+    borderColor = "#dc2626";
+  } else if (realNetAssets < 0 || realOrd < 0 || repayYears > 15) {
+    rTitle = "要注意先（実態毀損・償還年数長期化）";
+    rSub = `実態修正後の純資産（${fmt(realNetAssets,1)}百万円）、実態経常利益（${fmt(realOrd,1)}百万円）、実態債務償還年数（${repayDisplay}）のいずれかが銀行の正常先基準を割り込んでいます。保証協会付融資や不動産担保保全が前提となる要注意ランクです。`;
+    rBadge = "C";
+    borderColor = "#d97706";
+  } else if (repayYears <= 7 && realNetAssets >= 50 && realEqRatio >= 25) {
+    rTitle = "正常先（上位・実態優良企業）";
+    rSub = `現金・売掛・在庫・建物・貸付金の厳格な自己査定フィルターをかけてもなお、実態純資産 ${fmt(realNetAssets,1)}百万円・実態債務償還年数 ${repayDisplay} と極めて強固な財務基盤を維持しています。無担保プロパー融資・好条件での資金調達が十分に可能です。`;
+    rBadge = "S〜A";
+    borderColor = "#10b981";
+  } else {
+    rTitle = "正常先（標準ランク・運転資金回遊圏内）";
+    rSub = `一部に不良資産控除（▲${fmt(totalBadAssets,1)}百万円）はあるものの、実態純資産はプラス（${fmt(realNetAssets,1)}百万円）を維持し、実態債務償還年数も ${repayDisplay} と返済許容範囲内に収まっています。滞留資産の圧縮を進めればさらに上位格付けが狙えます。`;
+    rBadge = "B";
+    borderColor = "#3b82f6";
+  }
+
+  document.getElementById("bankRankTitle").innerText = rTitle;
+  document.getElementById("bankRankSub").innerText = rSub;
+  document.getElementById("bankScoreBadge").innerText = rBadge;
+  document.getElementById("bankScoreBadge").style.color = borderColor;
+  heroEl.style.borderLeftColor = borderColor;
+}
+
+// ワンクリックで試せるサンプルデータ読込機能
+function loadSample(type) {
+  let d;
+  if (type === "healthy") {
+    document.getElementById("companyName").value = "株式会社優良精機（健全製造業モデル）";
+    document.getElementById("industry").value = "mfg_machinery";
+    onIndustryChange();
+    d = {
+      sales:[520,560,600], cost:[380,405,430], op:[32,38,45], ord:[30,36,42], ni:[20,24,28], dep:[16,17,18],
+      cash:[3,4,5], depo:[80,95,115], rec:[95,100,105], inv:[60,62,65], sloan:[0,0,0], odir:[0,0,0],
+      bldg:[110,105,100], land:[120,120,120], mach:[45,42,40], rights:[0,0,0],
+      pay:[60,65,70], sdebt:[50,45,40], ldebt:[160,145,130], lease:[8,6,5], ydir:[20,20,20], oliab:[25,25,25], nass:[190,213,240]
+    };
+  } else {
+    document.getElementById("companyName").value = "株式会社サンプル製作所（表面黒字・実態粉飾疑いモデル）";
+    document.getElementById("industry").value = "mfg_machinery";
+    onIndustryChange();
+    d = {
+      sales:[500,550,600], cost:[380,420,450], op:[22,26,30], ord:[18,22,26], ni:[11,14,17], dep:[14,14,15],
+      cash:[4,8,22], depo:[65,60,58], rec:[110,160,250], inv:[65,110,185], sloan:[12,15,15], odir:[5,8,12],
+      bldg:[105,100,100], land:[120,120,120], mach:[40,38,35], rights:[3,3,3],
+      pay:[65,70,75], sdebt:[110,140,190], ldebt:[230,270,350], lease:[10,12,15], ydir:[30,30,30], oliab:[24,25,20], nass:[90,105,120]
+    };
+  }
+  applyDataObject(d);
+}
+
+function applyDataObject(d) {
+  const keys = ["sales","cost","op","ord","ni","dep","cash","depo","rec","inv","sloan","odir","bldg","land","mach","rights","pay","sdebt","ldebt","lease","ydir","oliab","nass"];
+  keys.forEach(k => {
+    if (d[k] && Array.isArray(d[k])) {
+      [0, 1, 2].forEach(i => {
+        const el = document.getElementById(`${k}_${i}`);
+        if (el && d[k][i] !== undefined) el.value = d[k][i];
+      });
+    }
+  });
+  analyze();
+}
+
+function importJSON() {
+  try {
+    const d = JSON.parse(document.getElementById("jsonInput").value);
+    applyDataObject(d);
+    alert("3期分の決算データをすべて反映しました。");
+  } catch (e) {
+    alert("JSONの形式が正しくありません。");
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  onIndustryChange();
+});
+</script>
+</body>
+</html>
